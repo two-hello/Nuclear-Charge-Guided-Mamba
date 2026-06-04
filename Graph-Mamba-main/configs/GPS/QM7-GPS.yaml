@@ -1,0 +1,67 @@
+out_dir: results
+metric_best: mae   # QM7 是回归任务，用 MAE（Mean Absolute Error）作为指标
+
+wandb:
+  use: True
+  project: GNN-Benchmark-RandomSeed
+  entity: project
+
+dataset:
+  format: PyG
+  name: QM7
+  task: graph
+  task_type: regression   # 关键点！QM7 是回归任务
+  transductive: False
+  node_encoder: True
+  node_encoder_name: Type
+  node_encoder_bn: False
+  edge_encoder: False  # QM7 通常没有显式的边特征
+  edge_encoder_name: LinearEdge
+  edge_encoder_bn: False
+
+posenc_LapPE:
+  enable: False   # QM7 较小，位置编码可选
+
+train:
+  mode: custom
+  batch_size: 64
+  eval_period: 1
+  ckpt_period: 100
+
+model:
+  type: GPSModel
+  loss_fun: mae   # 关键点！MAE 作为回归损失
+  edge_decoding: dot
+  graph_pooling: mean
+
+gt:
+  layer_type: GatedGCN   # 可换成 GINE、GCN、GIN 等
+  layers: 3
+  n_heads: 1   # 对于纯 GNN 可以设为 1
+  dim_hidden: 64
+  dropout: 0.1
+  attn_dropout: 0.0
+  layer_norm: False
+  batch_norm: True
+
+gnn:
+  head: default
+  layers_pre_mp: 0
+  layers_post_mp: 2
+  dim_inner: 64
+  batchnorm: True
+  act: relu
+  dropout: 0.1
+  agg: mean
+  normalize_adj: False
+
+optim:
+  clip_grad_norm: True
+  optimizer: adamW
+  weight_decay: 0.01
+  base_lr: 0.001
+  max_epoch: 200
+  scheduler: cosine_with_warmup
+  num_warmup_epochs: 5
+
+seed: 42
